@@ -42,7 +42,7 @@ export default{
   ],
   data(){
     return{
-        userID:  123,
+        userID:  null,
         currentCard: 'OpenTimerCard',
         timerCode: '',
     }

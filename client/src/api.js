@@ -1,3 +1,22 @@
+const axios = require('axios');
+const SERVER_URL = 'http://localhost:8088/';
+
+export async function signIn(email, password){
+    let url = SERVER_URL + 'user/signin';
+
+
+    axios.post(url, {
+        email,
+        password
+    })
+    .then(function (response) {
+        console.log(response);
+    })
+}
+
+
+
+
 const getIdbyCode = code => {
     let id = code;
     return id;

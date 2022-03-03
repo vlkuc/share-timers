@@ -1,42 +1,44 @@
 <template>
-    <p class="input-description">{{ title }}</p>
-    <select v-model="accessMode" name="" id="" class="time-start default-input">
-        <option value="all">Все</option>
-        <option value="special">Определенные пользователи</option>
-        <option value="nobody">Только я</option>
-    </select>
-    <template v-if="accessMode === 'special'">
-        <input 
-            type="text"
-            placeholder="Укажите email пользователя..."  
-            v-model="whoHasAccess" 
-            :class="errorText ? 'default-input wrong-input' : 'default-input'"
-        >
-        <button
-            class="button"
-            @click="addUserWhoHasAccess"
-        >
-            Добавить пользователя
-        </button>
-        <p 
-            class="input-error"
-            v-if="errorText"
-        >
-            {{ errorText }}
-        </p>
-        <p>
-            <span 
-                class="users-wcs"
-                v-for="(user, index) in whoHasAccessList" 
-                :key="user"
-            > 
-                {{ user }} 
+    <div class="wrapper">
+        <p class="input-description">{{ title }}</p>
+        <select v-model="accessMode" name="" id="" class="time-start default-input">
+            <option value="all">Все</option>
+            <option value="special">Определенные пользователи</option>
+            <option value="nobody">Только я</option>
+        </select>
+        <template v-if="accessMode === 'special'">
+            <input 
+                type="text"
+                placeholder="Укажите email пользователя..."  
+                v-model="whoHasAccess" 
+                :class="errorText ? 'default-input wrong-input' : 'default-input'"
+            >
+            <button
+                class="button"
+                @click="addUserWhoHasAccess"
+            >
+                Добавить пользователя
+            </button>
+            <p 
+                class="input-error"
+                v-if="errorText"
+            >
+                {{ errorText }}
+            </p>
+            <p>
                 <span 
-                    @click="whoHasAccessList.splice(index, 1)"
-                > x </span> 
-            </span>
-        </p>
-    </template>
+                    class="users-wcs"
+                    v-for="(user, index) in whoHasAccessList" 
+                    :key="user"
+                > 
+                    {{ user }} 
+                    <span 
+                        @click="whoHasAccessList.splice(index, 1)"
+                    > x </span> 
+                </span>
+            </p>
+        </template>
+    </div>
 </template>
 
 <script>

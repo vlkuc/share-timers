@@ -6,6 +6,7 @@
                 <input 
                 class="default-input" 
                 type="text"
+                v-model="email"
                 >
                 <p class="input-error"></p>
             </div>
@@ -14,16 +15,18 @@
                 <input 
                 class="default-input" 
                 type="password"
+                v-model="password"
                 >
                 <p class="input-error"></p>
             </div>
             
             <div class="buttons">
-                <button
+                <div
                     class="button"
+                    @click="logIn"
                 >
                     Войти
-                </button>
+                </div>
                 <p 
                     class="switch-button link"
                     @click="$emit('switch-card', 'SignUpCard')"
@@ -42,10 +45,19 @@
 </template>
 
 <script>
+import { signIn } from '../api'
 export default {
     name: 'SignInCard',
-    props: {
-
+    data(){
+        return{
+            email: '',
+            password: '',
+        }
+    },
+    methods: { 
+        async logIn(){
+            await signIn(this.email, this.password);
+        }
     }
 }
 </script>
