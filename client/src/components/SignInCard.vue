@@ -4,29 +4,35 @@
             <p class="input-description">Введите email</p>
             <div class="input-wrapper">
                 <input 
-                class="default-input" 
-                type="text"
-                v-model="email"
+                    class="default-input" 
+                    type="text"
+                    v-model="email"
+                    @blur="checkEmail"
                 >
-                <p class="input-error"></p>
+                <p v-if="emailErorr" class="input-error">
+                    Неверный формат электронной почты
+                </p>
             </div>
             <p class="input-description">Введите пароль</p>
             <div class="input-wrapper">
                 <input 
-                class="default-input" 
-                type="password"
-                v-model="password"
+                    class="default-input" 
+                    type="password"
+                    v-model="password"
+                    @blur="checkPassword"
                 >
-                <p class="input-error"></p>
+                <p v-if="passwordErorr" class="input-error">
+                    {{ passwordErorr }}
+                </p>
             </div>
             
             <div class="buttons">
-                <div
+                <button
                     class="button"
                     @click="logIn"
                 >
                     Войти
-                </div>
+                </button>
                 <p 
                     class="switch-button link"
                     @click="$emit('switch-card', 'SignUpCard')"
@@ -46,17 +52,49 @@
 
 <script>
 import { signIn } from '../api'
+import { checkValidEmail } from '../services/common.service'
 export default {
     name: 'SignInCard',
     data(){
         return{
             email: '',
             password: '',
+            emailErorr: false,
+            passwordErorr: false,
         }
     },
     methods: { 
-        async logIn(){
-            await signIn(this.email, this.password);
+        checkEmail(event){
+            if (!checkValidEmail(this.email)){
+                event.target.focus();
+                this.emailErorr = true;
+            }
+        },
+        checkPassword(event){
+            if (this.password == ''){
+                event.target.focus();
+                this.passwordErorr = 'Введите пароль';
+            }
+        },
+        async logIn(event){
+            event.preventDefault();
+            if (!this.emailErorr && !this.passwordErorr){
+                let loginData = await signIn(this.email, this.password);
+                if (loginData.error){
+                    this.passwordErorr = 'Неверный email или пароль'; 
+                } else {
+                    this.$emit('get-userid', loginData.personID);
+                    this.$emit('switch-card', 'OpenTimerCard');
+                }
+            }
+        },
+    },
+    watch: {
+        password(){
+            this.passwordErorr = '';
+        },
+        email(){
+            this.emailErorr = false;
         }
     }
 }

@@ -5,6 +5,7 @@
         
         @switch-card="switchCard"
         @get-code="getCode"
+        @get-userid="getUserID"
         
         :userID="userID"
         :timerCode="timerCode"
@@ -13,6 +14,8 @@
     
     <timers-list 
         v-if='userID'
+        @switch-card="switchCard"
+        @get-userid="getUserID"
     />
 </div>
 </template>
@@ -53,6 +56,9 @@ export default{
       },
       getCode(value){
           this.timerCode = value;
+      },
+      getUserID(value){
+        this.userID = value;
       }
   }
 }
@@ -253,5 +259,21 @@ input::-webkit-inner-spin-button {
 
 input[type=number] {
     -moz-appearance:textfield;
+}
+
+.logout{
+  margin: 0;
+  color: #4ca8af;
+  cursor: pointer;
+  align-self: center;
+}
+
+.logout:hover{
+  text-decoration: underline;
+}
+
+.title-wrapper{
+  display: flex;
+  flex-direction: row;
 }
 </style>

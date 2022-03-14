@@ -1,7 +1,10 @@
 <template>
   <div class="card timers-list-card">
     <div class="content-wrapper">
-        <p class="input-description">Мои таймеры</p>
+        <div class="title-wrapper">
+          <p class="input-description">Мои таймеры</p>
+          <p class="logout" @click="logout">Выйти</p>
+        </div>
         <ul class="timers-list">
             <li 
                 v-for="(timer, index) in paginatedTimers" :key="index"
@@ -100,6 +103,12 @@ export default {
               id: '2'
           }
       ]
+    }
+  },
+  methods:{
+    logout(){
+      this.$emit('get-userid', null);
+      this.$emit('switch-card', 'OpenTimerCard');
     }
   },
   computed: {

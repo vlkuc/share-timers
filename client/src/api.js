@@ -1,19 +1,36 @@
 const axios = require('axios');
 const SERVER_URL = 'http://localhost:8088/';
 
+// Отправляем запрос с целью получения идентификатора пользователя
 export async function signIn(email, password){
     let url = SERVER_URL + 'user/signin';
 
-
-    axios.post(url, {
+    return await axios.post(url, {
         email,
         password
     })
     .then(function (response) {
-        console.log(response);
+        return response.data
     })
 }
 
+// Отправляем запрос с целью создания новой учетной записи и получения ее идентификатора
+export async function signUp(email, password){
+    let url = SERVER_URL + 'user/create';
+
+    return await axios.post(url, {
+        email,
+        password
+    })
+    .then(function (response) {
+        return response.data
+    })
+}
+
+// Отправляем запрос на создание нового таймера
+export async function createTimer(){
+    
+}
 
 
 
