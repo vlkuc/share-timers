@@ -39,8 +39,19 @@ class UserController {
     // Метод, реализующий удаление пользователя по его id
     async deleteUser(request, response){
         const id = request.params.id;
-        const newPerson = await db.query(`DELETE FROM person where id = $1`, [id]);
-        response.json(newPerson.rows[0]);
+        const deletedPerson = await db.query(`DELETE FROM person where id = $1`, [id]);
+        response.json(deletedPerson.rows[0]);
+    }
+
+    // Метод, реализующий получение подписок пользователя по его id
+    async getSubscriptions(request, response){
+        const id = request.params.id;
+        const subscriptions = await db
+            .query(
+            `SELECT timer_id, timer_name FROM subscription
+            INNER JOIN  timer ON timer.id = subscription.timer_id
+            where subscription.user_id = $1`, [id]);
+        response.json(subscriptions.rows[0]);
     }
 }
 

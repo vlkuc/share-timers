@@ -27,35 +27,12 @@ export async function signUp(email, password){
     })
 }
 
-// Отправляем запрос на создание нового таймера
-export async function createTimer(){
-    
+export async function getSubscriptions(userID){
+    let url = SERVER_URL + `user/subscriptions/${userID}`;
+
+    return await axios
+        .get(url)
+        .then(function (response) {
+            return response.data
+        })
 }
-
-
-
-const getIdbyCode = code => {
-    let id = code;
-    return id;
-};
-
-export async function getTimerById(id){
-    let promise = new Promise((resolve, reject) => {
-        setTimeout(() => resolve(
-            {
-                name: id,
-                time: 65,
-                subs: 999,
-            }
-        ), 2000)
-    });
-
-    let result = await promise;
-
-    return result    
-};
-
-export async function getTimerByCode(code){
-    let id = getIdbyCode(code);
-    return await getTimerById(id);
-};

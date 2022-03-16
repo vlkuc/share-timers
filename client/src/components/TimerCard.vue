@@ -82,7 +82,7 @@
 </template>
 
 <script>
-import { getTimerByCode } from '../api'
+import { getTimerByCode } from '../api/user.api'
 import { formatTime } from '../services/timecard.service'
 
 export default {

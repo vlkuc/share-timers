@@ -53,11 +53,11 @@
                     class="time-input default-input"
                 >
                     <option 
-                        :value="index < 10 ? '0' + index : index"
+                        :value="index"
                         v-for="index in numberOfDays"
                         :key="index"
                     >
-                        {{ index < 10 ? '0' + index : index}}
+                        {{index}}
                     </option>
                 </select>
                 <p>.</p>
@@ -66,11 +66,11 @@
                     class="time-input default-input"
                 >
                     <option 
-                        :value="index < 10 ? '0' + index : index"
+                        :value="index < 10 ? index : index"
                         v-for="index in 12"
                         :key="index"
                     >
-                        {{ index < 10 ? '0' + index : index}}
+                        {{index}}
                     </option>
                 </select>
                 <select
@@ -141,22 +141,23 @@
 
         <input-for-list 
             title="Кто может видеть таймер"
-            @get-mode-and-list="value => whoCanSee = value"
+            @get-list="value => whoCanSee = value"
+            @get-mode="value => seenMode = value"
         />
 
         <input-for-list 
-            title="Кто может останавливать и перезапускать таймер"
-            @get-mode-and-list="value => whoCanManage = value"
+            title="Кто может перезапускать таймер"
+            @get-list="value => whoCanRestart = value"
         />
 
         <input-for-list 
             title="Кто может изменять настройки таймера"
-            @get-mode-and-list="value => whoCanRedact = value"
+            @get-list="value => whoCanManage = value"
         />
 
         <button
             class="button button__topmargin"
-            @click="createTimer"
+            @click="create"
         > 
             Создать
         </button>
@@ -167,6 +168,7 @@
 </template>
 
 <script>
+import { createTimer } from '../api/timer.api'
 import InputForList from './InputForList.vue'
 export default {
     components: { InputForList },
@@ -178,11 +180,11 @@ export default {
         return{
             errorText: '',
             timerName: '',
-            hour: '00',
-            minute : '00',
-            day: '01',
-            month: '01',
-            year: '2022',
+            hour: 0,
+            minute : 0,
+            day: 1,
+            month: 1,
+            year: 2022,
             dayIs: true,
             workDays: 0,
             workHours: 0,
@@ -190,13 +192,14 @@ export default {
             restartAuto: false,
             restartHours: 0,
             restartMinutes: 0,
-            whoCanSee: {mode: 'all', usersList: []},
-            whoCanManage: {mode: 'all', usersList: []},
-            whoCanRedact: {mode: 'all', usersList: []},
+            seenMode: 'all',
+            whoCanSee: [],
+            whoCanManage: [],
+            whoCanRestart: [],
         }
     },
     methods : {
-        createTimer(){
+        async create(){
             if (this.timerName == ''){
                 this.errorText = 'Введите название таймера';
                 return
@@ -205,20 +208,47 @@ export default {
                 this.errorText = 'Введите время работы таймера';
                 return
             }
+
+            let startTime = new Date(this.year, this.month, this.day, this.hour, this.minute);
+            startTime = startTime.getTime() / 1000;
+            
+            let circleTime = this.workDays*86400 + this.workHours*3600 + this.workMinutes*60;
+
+            let delayTime = 0;
+            if (this.restartAuto){
+                delayTime = this.restartHours*3600 + this.restartMinutes*60;
+            }
+
+            let permissions = {
+                whoCanSee : this.whoCanSee,
+                whoCanManage : this.whoCanManage,
+                whoCanRedact : this.whoCanRedact
+            }
+
+            let response = createTimer(
+                this.timerName, 
+                startTime, 
+                circleTime, 
+                this.restartAuto, 
+                delayTime, 
+                this.seenMode,
+                this.userID,
+                permissions
+            );
         }
     },
     computed : {
         numberOfDays() {
             switch(this.month){
-                case '01':
-                case '03':
-                case '05':
-                case '07':
-                case '08':
-                case '10':
-                case '12':
+                case 1:
+                case 3:
+                case 5:
+                case 7:
+                case 8:
+                case 10:
+                case 12:
                     return 31
-                case '02':
+                case 2:
                     if (this.year % 4 === 0 && this.year % 100 !== 0 || this.year % 400 === 0) return 29
                     return 28
                 default:
@@ -260,10 +290,10 @@ export default {
     },
     mounted () {
         let now = new Date();
-        this.hour = now.getHours() < 10 ? '0' + now.getHours() : now.getHours();
-        this.minute = now.getMinutes() < 10 ? '0' + now.getMinutes() : now.getMinutes();
-        this.day = now.getDate() < 10 ? '0' + now.getDate() : now.getDate();
-        this.month = now.getMonth() < 10 ? '0' + now.getMonth() : now.getMonth();
+        this.hour = now.getHours();
+        this.minute = now.getMinutes();
+        this.day = now.getDate();
+        this.month = now.getMonth();
         this.year = now.getFullYear();
     }
 }

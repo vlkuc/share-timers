@@ -1,0 +1,20 @@
+const axios = require('axios');
+const SERVER_URL = 'http://localhost:8088/';
+
+export async function createTimer(timer_name, start_time, circle_time, restart_auto, delay_time, seen_mode, user_id, permissions){
+    let url = SERVER_URL + 'timer/create';
+
+    return await axios.post(url, {
+        timer_name, 
+        start_time, 
+        circle_time, 
+        restart_auto, 
+        delay_time, 
+        seen_mode, 
+        user_id, 
+        permissions
+    })
+    .then(function (response) {
+        return response.data
+    })
+}

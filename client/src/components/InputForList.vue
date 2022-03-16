@@ -74,6 +74,10 @@ export default{
             } else {
                 this.errorText = 'Некорректный формат электронной почты';
             }
+        },
+        sendData(){
+            this.$emit('get-list', this.whoHasAccess);
+            this.$emit('get-mode', this.accessMode);
         }
     },
     watch: {

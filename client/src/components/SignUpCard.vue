@@ -56,7 +56,7 @@
 </template>
 
 <script>
-import { signUp } from '../api'
+import { signUp } from '../api/user.api'
 import { checkValidEmail } from '../services/common.service'
 
 export default {

@@ -51,7 +51,7 @@
 </template>
 
 <script>
-import { signIn } from '../api'
+import { signIn } from '../api/user.api'
 import { checkValidEmail } from '../services/common.service'
 export default {
     name: 'SignInCard',
