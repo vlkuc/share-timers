@@ -4,15 +4,19 @@
       <p class="input-description">Найти таймер с помощью кода</p>
       <div class="input-wrapper">
         <input 
-        :class="inputChecked && timerCode.length !== 16 ? 'default-input wrong-input' : 'default-input'"
-        type="text"
-        v-model="timerCode"
-        @blur="inputChecked = true"
+          :class="inputChecked && timerCode.length !== 16 ? 'default-input wrong-input' : 'default-input'"
+          type="text"
+          v-model="timerCode"
+          @blur="inputChecked = true"
+          @focus="codeError = false"
         >
         <p 
           v-if="inputChecked && timerCode.length !== 16"
           class="input-error"
         >Длина кода должна быть 16 символов.</p>
+        <p v-if="codeError" class="input-error">
+          Таймер ненайден!
+        </p>
       </div>
       <div class="buttons">
         <button
@@ -59,6 +63,7 @@
 </template>
 
 <script>
+import {getTimerIdByCode} from '../api/timer.api'
 export default {
   name: 'OpenTimerCard',
   props: {
@@ -68,12 +73,19 @@ export default {
     return{
       timerCode: '',
       inputChecked: false,
+      codeError: false
     }
   },
   methods : {
-    useCode(){
-      this.$emit('get-code', this.timerCode);
-      this.$emit('switch-card','TimerCard');
+    async useCode(){
+      let timerID = await getTimerIdByCode(this.timerCode);
+
+      if (timerID !== undefined){
+        this.$emit('get-timerid', timerID);
+        this.$emit('switch-card','TimerCard');
+      } else {
+        this.codeError = true;
+      }
     }
   }
 }

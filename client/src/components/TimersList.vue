@@ -9,107 +9,60 @@
             <li 
                 v-for="(timer, index) in paginatedTimers" :key="index"
                 class="timers-item"
+                @click="openTimer(timer.id)"
             >
-                {{ timer.name }}
+                {{ timer.timer_name }}
             </li>
         </ul>
         <div class="pagination-wrapper">
-          <p class="button pagination-arrow" @click="page--">-</p>
+          <p 
+            :class=" page == 1 ? 'pagination-arrow__inactive button pagination-arrow' : 'button pagination-arrow'" 
+            @click="page--"
+          >
+            -
+          </p>
           <input v-model="page" type="number" class="pagination-page default-input">
-          <p class="button pagination-arrow" @click="page++">+</p>
+          <p 
+            :class=" page == maxPage ? 'pagination-arrow__inactive button pagination-arrow' : 'button pagination-arrow'" 
+            @click="page++"
+          >
+            +
+          </p>
         </div>
     </div>
   </div>
 </template>
 
 <script>
+import { getSubscriptions } from '../api/user.api'
 export default {
   name: 'TimersList',
+  props: {
+    userID : Number,
+    timerID: Number
+  },
   data(){
     return{
       timersCountOnPage: 10,
       page: 1,
-      timers: [
-          {
-              name: 'Работа',
-              id: '1'
-          },
-          {
-              name: 'Учеба',
-              id: '2'
-          },
-          {
-              name: 'Работа',
-              id: '1'
-          },
-          {
-              name: 'Учеба',
-              id: '2'
-          },
-          {
-              name: 'Работа',
-              id: '1'
-          },
-          {
-              name: 'Учеба',
-              id: '2'
-          },
-          {
-              name: 'Работа',
-              id: '1'
-          },
-          {
-              name: 'Учеба',
-              id: '2'
-          },
-          {
-              name: 'Работа',
-              id: '1'
-          },
-          {
-              name: 'Учеба',
-              id: '2'
-          },
-          {
-              name: 'Работа',
-              id: '1'
-          },
-          {
-              name: 'Учеба',
-              id: '2'
-          },
-          {
-              name: 'Работа',
-              id: '1'
-          },
-          {
-              name: 'Учеба',
-              id: '2'
-          },
-          {
-              name: 'Работа',
-              id: '1'
-          },
-          {
-              name: 'Учеба',
-              id: '2'
-          },
-          {
-              name: 'Работа',
-              id: '1'
-          },
-          {
-              name: 'Учеба',
-              id: '2'
-          }
-      ]
+      timers: []
     }
   },
   methods:{
     logout(){
       this.$emit('get-userid', null);
       this.$emit('switch-card', 'OpenTimerCard');
+    },
+    async getTimers(){
+      this.timers = await getSubscriptions(this.userID);
+    },
+    openTimer(id){
+      this.$emit('switch-card', 'TimerCard');
+      this.$emit('get-timerid', id);
     }
+  },
+  async mounted(){
+    this.getTimers();
   },
   computed: {
     startIndex(){
@@ -120,13 +73,19 @@ export default {
     },
     paginatedTimers(){
       return this.timers.slice(this.startIndex, this.endIndex);      
+    },
+    maxPage(){
+      return Math.floor((this.timers.length - 1) / this.timersCountOnPage) + 1
     }
   },
   watch: {
     page(){
       if (this.page < 1) this.page = 1;
-      if (this.page > (Math.floor(this.timers.length / this.timersCountOnPage) + 1)) 
-        this.page = Math.floor(this.timers.length / this.timersCountOnPage) + 1;
+      if (this.page > this.maxPage) 
+        this.page = this.maxPage;
+    },
+    timerID(){
+      this.getTimers();
     }
   }
 }
@@ -176,6 +135,16 @@ export default {
   margin-bottom: 0;
   border-radius: 2px;
   text-align: center;
+}
+
+.pagination-arrow__inactive{
+  cursor: default;
+  background-color: rgba(129, 166, 168, 0.4);
+}
+
+.pagination-arrow__inactive:hover{
+  cursor: default;
+  background-color: rgba(129, 166, 168, 0.4);
 }
 
 .pagination-page{

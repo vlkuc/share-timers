@@ -46,13 +46,24 @@ class UserController {
     // Метод, реализующий получение подписок пользователя по его id
     async getSubscriptions(request, response){
         const id = request.params.id;
-        const subscriptions = await db
+        let subscriptions = await db
             .query(
             `SELECT timer_id, timer_name FROM subscription
             INNER JOIN  timer ON timer.id = subscription.timer_id
-            where subscription.user_id = $1`, [id]);
-        response.json(subscriptions.rows[0]);
-    }
+            where subscription.user_id = $1`
+            , [id]
+        );
+
+       let owntimers = await db
+            .query(
+            `SELECT id, timer_name FROM timer
+            where user_id = $1`
+            , [id]
+        );
+        
+        response.json(owntimers.rows.concat(subscriptions.rows));
+
+        }
 }
 
 module.exports = new UserController();

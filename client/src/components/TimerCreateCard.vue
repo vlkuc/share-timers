@@ -169,6 +169,7 @@
 
 <script>
 import { createTimer } from '../api/timer.api'
+import { getTimerIdByCode } from '../api/timer.api'
 import InputForList from './InputForList.vue'
 export default {
     components: { InputForList },
@@ -211,7 +212,7 @@ export default {
 
             let startTime = new Date(this.year, this.month, this.day, this.hour, this.minute);
             startTime = startTime.getTime() / 1000;
-            
+
             let circleTime = this.workDays*86400 + this.workHours*3600 + this.workMinutes*60;
 
             let delayTime = 0;
@@ -222,10 +223,10 @@ export default {
             let permissions = {
                 whoCanSee : this.whoCanSee,
                 whoCanManage : this.whoCanManage,
-                whoCanRedact : this.whoCanRedact
+                whoCanRestart : this.whoCanRestart
             }
 
-            let response = createTimer(
+            let response = await createTimer(
                 this.timerName, 
                 startTime, 
                 circleTime, 
@@ -235,6 +236,9 @@ export default {
                 this.userID,
                 permissions
             );
+
+            this.$emit('get-timerid',  response);
+            this.$emit('switch-card', 'TimerCard');
         }
     },
     computed : {

@@ -4,18 +4,22 @@
         :is="currentCard"
         
         @switch-card="switchCard"
-        @get-code="getCode"
+        @get-timerid="getTimerID"
         @get-userid="getUserID"
         
         :userID="userID"
-        :timerCode="timerCode"
+        :timerID="timerID"
     >
     </component>
     
-    <timers-list 
+    <timers-list
+        :key="currentCard"
         v-if='userID'
         @switch-card="switchCard"
+        @get-timerid="getTimerID"
+        :timerID="timerID"
         @get-userid="getUserID"
+        :userID="userID"
     />
 </div>
 </template>
@@ -47,15 +51,15 @@ export default{
     return{
         userID:  null,
         currentCard: 'OpenTimerCard',
-        timerCode: '',
+        timerID: null,
     }
   },
   methods : {
       switchCard(value = 'OpenTimerCard'){
           this.currentCard = value;
       },
-      getCode(value){
-          this.timerCode = value;
+      getTimerID(value){
+          this.timerID = value;
       },
       getUserID(value){
         this.userID = value;
@@ -275,5 +279,10 @@ input[type=number] {
 .title-wrapper{
   display: flex;
   flex-direction: row;
+}
+
+.delete-button{
+  width: fit-content;
+  background: #af4c4c;
 }
 </style>

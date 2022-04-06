@@ -13,8 +13,6 @@ create TABLE timer(
     restart_auto BOOLEAN,
     delay_time SERIAL,
     seen_mode VARCHAR(255),
-    manage_mode VARCHAR(255),
-    restart_mode VARCHAR(255),
     user_id INTEGER,
     FOREIGN KEY (user_id) REFERENCES person (id)
 );

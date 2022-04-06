@@ -6,14 +6,9 @@ class TimerController {
     // Метод, реализующий создание таймера
     async createTimer(request, response){
         const {timer_name, start_time, circle_time, restart_auto, delay_time, seen_mode, user_id, permissions} = request.body;
-        const timerWithSameCode = undefined;
-
-        do {
-            const code = crypto.randomBytes(8).toString('hex');
-            timerWithSameCode = await db.query(`SELECT id FROM timer where code = $1`, [code]);
-        } while(timerWithSameCode.rowCount === 0);
+        let code = crypto.randomBytes(8).toString('hex');
         
-        const IDOfNewTimer = await db.query(
+        const NewTimer = await db.query(
             `INSERT INTO timer (code, timer_name, start_time, circle_time, restart_auto, delay_time, seen_mode, user_id)
             values ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id`, 
             [code, timer_name, start_time, circle_time, restart_auto, delay_time, seen_mode, user_id]
@@ -40,28 +35,133 @@ class TimerController {
             });
         }
         
-        response.json(IDOfNewTimer);
+        response.json(NewTimer.rows[0]);
     }
     // Метод, реализующий получение таймера по уникальному коду.
-    async getTimerByCode(request, response){
+    async getTimerIdByCode(request, response){
         const timerCode = request.params.code;
-        const timer = await db.query(`SELECT * FROM timer where code = $1`, [timerCode]);
-        response.json(timer);
+        const timer = await db.query(`SELECT id FROM timer where code = $1`, [timerCode]);
+        response.json(timer.rows[0]);
     }
+
+    
     // Метод, реализующий получение таймера по ID.
-    async getTimerById(request, response){
-        const timerID = request.params.id;
+    async getTimer(request, response){
+        const timerID = request.params.timerid;
+        const userID = request.params.userid;
+        
         const timer = await db.query(`SELECT * FROM timer where id = $1`, [timerID]);
-        response.json(timer);
+
+        if (userID != -1) {
+            if (userID == timer.rows[0].user_id) {
+                response.json(
+                    {
+                        error: false,
+                        timer : timer.rows[0],
+                        restart: true,
+                        manage: true,
+                        subscriber: true
+                    }
+                )
+            } else {
+                if ( timer.rows[0].seen_mode == 'nobody') {
+                    response.json(
+                        {
+                            error: true,
+                        }
+                    )
+                } else {
+                    const managePermission = await db.query(`SELECT * FROM manage_permission WHERE timer_id = $1 AND user_id = $2`, [timerID, userID]);
+                    const restartPermission = await db.query(`SELECT * FROM restart_permission WHERE timer_id = $1 AND user_id = $2`, [timerID, userID]);
+                    const subscription = await db.query(`SELECT * FROM subscription WHERE timer_id = $1 AND user_id = $2`, [timerID, userID]);
+                    
+                    if ( timer.rows[0].seen_mode == 'all') {
+                        response.json(
+                            {
+                                error: false,
+                                timer : timer.rows[0],
+                                restart: restartPermission.rows.length != 0,
+                                manage: managePermission.rows.length != 0,
+                                subscriber: subscription.rows.length != 0
+                            }
+                        )
+                    } else {
+                        const seenPermission = await db.query(`SELECT * FROM seen_permission WHERE user_id = $1 AND timer_idd = $2)`, [userID, timerID]);
+                        
+                        if (seenPermission.rows.length != 0){
+                            response.json(
+                                {
+                                    error: false,
+                                    timer : timer.rows[0],
+                                    restart: restartPermission.rows[0].length != 0,
+                                    manage: managePermission.rows[0].length != 0,
+                                    subscriber: subscription.rows[0].length != 0
+                                }
+                            )
+                        } else {
+                            response.json(
+                                {
+                                    error: true,
+                                }
+                            )
+                        }
+                        
+                    }
+                }
+            }
+        } else {
+            if(timer.rows[0].seen_mode == 'all'){
+                response.json(
+                    {
+                        error: false,
+                        timer : timer.rows[0],
+                        restart: false,
+                        manage: false,
+                        subscriber: false
+                    }
+                )
+            } else {
+                response.json(
+                    {
+                        error: true,
+                    }
+                )
+            }
+        }
+
+
+        
     }
+
+
     async updateTimer(request, response){
 
     }
+
+
     // Метод, реализующий удаление таймера по ID.
     async deleteTimer(request, response){
-        const timerID = request.params.id;
-        const deletedTimer = await db.query(`DELETE FROM timer where id = $1`, [timerID]);
-        response.json(deletedTimer);
+        const { timerID, userID }  = request.body;
+        const message = {text: ''};
+
+        let ownerID = await db.query(`SELECT user_id FROM timer where id = $1`, [timerID]);
+        ownerID = ownerID.rows[0].user_id;
+
+        let deletedTimer = {};
+        let temp = {};
+        if (ownerID == userID){
+            deletedTimer = await db.query(`DELETE FROM timer where id = $1`, [timerID]);
+            temp = await db.query(`DELETE FROM restart_permission where timer_id = $1`, [timerID]);
+            temp = await db.query(`DELETE FROM seen_permission where timer_id = $1`, [timerID]);
+            temp = await db.query(`DELETE FROM manage_permission where timer_id = $1`, [timerID]);
+            temp = await db.query(`DELETE FROM subscription where timer_id = $1`, [timerID]);
+
+            message.text = 'Timer was deleted';
+        } else {
+            message.text = 'No rights';
+        }
+        
+        response.json(message);
     }
 }
 

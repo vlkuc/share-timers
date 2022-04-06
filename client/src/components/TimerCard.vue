@@ -82,14 +82,15 @@
 </template>
 
 <script>
-import { getTimerByCode } from '../api/user.api'
+import { getTimer } from '../api/timer.api'
 import { formatTime } from '../services/timecard.service'
+import { getTime } from '../services/timecard.service'
 
 export default {
     name: 'TimerCard',
     props: {
         userID: Number,
-        timerCode: String
+        timerID: Number
     },
     data() {
         return {
@@ -112,11 +113,11 @@ export default {
         },
     },
     async mounted() {
-        let timer = await getTimerByCode(this.timerCode);
-        this.currentTime = timer.time;
-        this.timerName = timer.name;
-        this.timerSubs = timer.subs;
+        let data = await getTimer(this.timerID, this.userID);
+        let timer = data.timer;
+        this.timerName = timer.timer_name;
         this.startTimer();
+        this.currentTime = getTime(timer);
     },
     watch : {
         currentTime(){
